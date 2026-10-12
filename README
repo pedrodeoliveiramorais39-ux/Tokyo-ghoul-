@@ -1,1 +1,256 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tokyo Ghoul RPG - Ficha de Personagem</title>
+    <style>
+        :root {
+            --bg-color: #121214;
+            --card-bg: #1d1d21;
+            --accent-red: #c92a2a;
+            --accent-hover: #e03131;
+            --text-main: #f1f3f5;
+            --text-muted: #adb5bd;
+            --border-color: #2c2c35;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 25px; border-bottom: 2px solid var(--accent-red); padding-bottom: 15px; }
+        header h1 { color: var(--accent-red); font-size: 2rem; letter-spacing: 2px; text-transform: uppercase; }
+        header p { color: var(--text-muted); font-size: 0.95rem; }
+        
+        .card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .card h2 { font-size: 1.2rem; color: var(--accent-red); margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; text-transform: uppercase; }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+        
+        .input-group { margin-bottom: 12px; }
+        .input-group label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; }
+        .input-group input, .input-group select, .input-group textarea { width: 100%; background: #25262b; border: 1px solid var(--border-color); color: #fff; padding: 8px 12px; border-radius: 4px; font-size: 1rem; }
+        .input-group input:focus, .input-group select:focus, .input-group textarea:focus { outline: none; border-color: var(--accent-red); }
+
+        .attr-box { background: #25262b; border: 1px solid var(--border-color); border-radius: 6px; padding: 12px; text-align: center; }
+        .attr-box label { font-size: 0.8rem; font-weight: bold; color: var(--text-muted); display: block; margin-bottom: 5px; }
+        .attr-box input { width: 50px; text-align: center; font-size: 1.4rem; font-weight: bold; background: #121214; border: 1px solid var(--border-color); color: #fff; border-radius: 4px; margin-bottom: 8px; }
+        .btn-roll { background: var(--accent-red); color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold; width: 100%; text-transform: uppercase; transition: background 0.2s; }
+        .btn-roll:hover { background: var(--accent-hover); }
+
+        .status-bar-container { margin-bottom: 15px; }
+        .status-header { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 5px; font-weight: bold; }
+        .status-inputs { display: flex; gap: 10px; align-items: center; }
+        .status-inputs input { width: 70px; text-align: center; background: #25262b; border: 1px solid var(--border-color); color: white; padding: 4px; border-radius: 4px; }
+        
+        .dice-modal { background: #25262b; border: 1px solid var(--accent-red); border-radius: 6px; padding: 15px; margin-top: 20px; text-align: center; }
+        .dice-modal h3 { margin-bottom: 10px; color: var(--accent-red); font-size: 1.1rem; }
+        #dice-result { font-size: 1.3rem; font-weight: bold; color: #fff; min-height: 40px; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .die { background: #121214; border: 2px solid var(--accent-red); padding: 5px 12px; border-radius: 4px; display: inline-block; }
+        .die.highest { background: var(--accent-red); color: white; transform: scale(1.1); box-shadow: 0 0 10px rgba(201, 42, 42, 0.7); }
+
+        textarea { resize: vertical; min-height: 80px; }
+        
+        @media(max-width: 768px) {
+            .grid-2, .grid-3, .grid-5 { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Tokyo Ghoul RPG</h1>
+            <p>Ficha de Personagem Dinâmica &bull; Baseado em Ordem Paranormal</p>
+        </header>
+
+        <!-- Informações Básicas -->
+        <div class="card">
+            <h2>Identidade</h2>
+            <div class="grid-2">
+                <div class="input-group">
+                    <label>Nome do Personagem</label>
+                    <input type="text" id="char-name" placeholder="Ex: Ken Kaneki">
+                </div>
+                <div class="input-group">
+                    <label>Jogador</label>
+                    <input type="text" id="player-name" placeholder="Seu nome">
+                </div>
+            </div>
+            <div class="grid-2" style="margin-top: 10px;">
+                <div class="input-group">
+                    <label>Espécie</label>
+                    <select id="char-species">
+                        <option value="Humano">Humano</option>
+                        <option value="Ghoul Natural">Ghoul Natural</option>
+                        <option value="Híbrido Não-Natural">Híbrido Não-Natural</option>
+                        <option value="Híbrido de Nascimento">Híbrido de Nascimento</option>
+                        <option value="Agente da CCG">Agente da CCG</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Tipo de Kagune / Quinque</label>
+                    <input type="text" id="char-weapon" placeholder="Ex: Ukaku / Rinkaku">
+                </div>
+            </div>
+        </div>
+
+        <!-- Atributos -->
+        <div class="card">
+            <h2>Atributos (Ordem Paranormal)</h2>
+            <div class="grid-5">
+                <div class="attr-box">
+                    <label>FORÇA</label>
+                    <input type="number" id="attr-for" value="2" min="0" max="5" onchange="updateDefesa()">
+                    <button class="btn-roll" onclick="rollAttribute('Força', 'attr-for')">Rolar</button>
+                </div>
+                <div class="attr-box">
+                    <label>AGILIDADE</label>
+                    <input type="number" id="attr-agi" value="2" min="0" max="5" onchange="updateDefesa()">
+                    <button class="btn-roll" onclick="rollAttribute('Agilidade', 'attr-agi')">Rolar</button>
+                </div>
+                <div class="attr-box">
+                    <label>VIGOR</label>
+                    <input type="number" id="attr-vig" value="2" min="0" max="5" onchange="updateDefesa()">
+                    <button class="btn-roll" onclick="rollAttribute('Vigor', 'attr-vig')">Rolar</button>
+                </div>
+                <div class="attr-box">
+                    <label>INTELECTO</label>
+                    <input type="number" id="attr-int" value="2" min="0" max="5" onchange="updateDefesa()">
+                    <button class="btn-roll" onclick="rollAttribute('Intelecto', 'attr-int')">Rolar</button>
+                </div>
+                <div class="attr-box">
+                    <label>PRESENÇA</label>
+                    <input type="number" id="attr-pre" value="2" min="0" max="5" onchange="updateDefesa()">
+                    <button class="btn-roll" onclick="rollAttribute('Presença', 'attr-pre')">Rolar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recursos e Defesa -->
+        <div class="card">
+            <h2>Recursos & Status</h2>
+            <div class="grid-3">
+                <div class="status-bar-container">
+                    <div class="status-header">
+                        <span>Pontos de Vida (PV)</span>
+                    </div>
+                    <div class="status-inputs">
+                        <input type="number" id="pv-current" value="20"> / <input type="number" id="pv-max" value="20">
+                    </div>
+                </div>
+                <div class="status-bar-container">
+                    <div class="status-header">
+                        <span>Sanidade / Humanidade</span>
+                    </div>
+                    <div class="status-inputs">
+                        <input type="number" id="san-current" value="20"> / <input type="number" id="san-max" value="20">
+                    </div>
+                </div>
+                <div class="status-bar-container">
+                    <div class="status-header">
+                        <span>Células RC / Fome</span>
+                    </div>
+                    <div class="status-inputs">
+                        <input type="number" id="rc-current" value="100"> / <input type="number" id="rc-max" value="100">
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center; background: #25262b; padding: 10px 15px; border-radius: 6px;">
+                <span style="font-weight: bold; font-size: 0.9rem; color: var(--text-muted);">DEFESA PASSIVA</span>
+                <input type="number" id="defesa-total" value="12" style="width: 70px; text-align: center; background: #121214; border: 1px solid var(--border-color); color: white; padding: 5px; border-radius: 4px; font-weight: bold;">
+            </div>
+        </div>
+
+        <!-- Painel de Rolagem de Dados -->
+        <div class="dice-modal">
+            <h3 id="dice-title">Painel de Resultados (d20)</h3>
+            <div id="dice-result">Clique em "Rolar" em qualquer atributo acima!</div>
+        </div>
+
+        <!-- Inventário e Habilidades -->
+        <div class="grid-2" style="margin-top: 20px;">
+            <div class="card">
+                <h2>Inventário / Quinques / Kagune</h2>
+                <div class="input-group">
+                    <textarea id="char-inventory" placeholder="Liste seus itens, armas e quinques aqui..."></textarea>
+                </div>
+            </div>
+            <div class="card">
+                <h2>Anotações & Habilidades</h2>
+                <div class="input-group">
+                    <textarea id="char-notes" placeholder="Poderes da Kagune, histórico ou notas da sessão..."></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateDefesa() {
+            const agi = parseInt(document.getElementById('attr-agi').value) || 0;
+            document.getElementById('defesa-total').value = 10 + agi;
+            saveData();
+        }
+
+        function rollAttribute(attrName, elementId) {
+            let count = parseInt(document.getElementById(elementId).value) || 0;
+            let results = [];
+            let titleEl = document.getElementById('dice-title');
+            let resultEl = document.getElementById('dice-result');
+
+            if (count <= 0) {
+                let d1 = Math.floor(Math.random() * 20) + 1;
+                let d2 = Math.floor(Math.random() * 20) + 1;
+                let worst = Math.min(d1, d2);
+                titleEl.innerText = `Rolagem de ${attrName} (Atributo 0: 2d20 pior)`;
+                resultEl.innerHTML = `<span class="die">${d1}</span> e <span class="die">${d2}</span> &rarr; Pior: <span class="die highest">${worst}</span>`;
+                return;
+            }
+
+            for (let i = 0; i < count; i++) {
+                results.push(Math.floor(Math.random() * 20) + 1);
+            }
+
+            let highest = Math.max(...results);
+            titleEl.innerText = `Rolagem de ${attrName} (${count}d20)`;
+            let html = '';
+            let highestMarked = false;
+
+            results.forEach(val => {
+                if (val === highest && !highestMarked) {
+                    html += `<span class="die highest">${val}</span> `;
+                    highestMarked = true;
+                } else {
+                    html += `<span class="die">${val}</span> `;
+                }
+            });
+
+            html += ` &rarr; <strong>Maior: ${highest}</strong>`;
+            resultEl.innerHTML = html;
+        }
+
+        const fields = ['char-name', 'player-name', 'char-species', 'char-weapon', 'attr-for', 'attr-agi', 'attr-vig', 'attr-int', 'attr-pre', 'pv-current', 'pv-max', 'san-current', 'san-max', 'rc-current', 'rc-max', 'defesa-total', 'char-inventory', 'char-notes'];
+
+        function saveData() {
+            fields.forEach(id => {
+                localStorage.setItem(id, document.getElementById(id).value);
+            });
+        }
+
+        function loadData() {
+            fields.forEach(id => {
+                if(localStorage.getItem(id) !== null) {
+                    document.getElementById(id).value = localStorage.getItem(id);
+                }
+            });
+        }
+
+        fields.forEach(id => {
+            document.getElementById(id).addEventListener('input', saveData);
+        });
+
+        window.onload = loadData;
+    </script>
+</body>
+</html>
 
